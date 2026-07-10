@@ -1,0 +1,8 @@
+{
+  "itemGroup.portable_tunes": "Portable Tunes",
+
+  "block.portable_tunes.tape_deck": "Tape Deck",
+
+  "item.portable_tunes.blank_cassette": "Blank Cassette",
+  "item.portable_tunes.blank_disk": "Blank Disk"
+}
