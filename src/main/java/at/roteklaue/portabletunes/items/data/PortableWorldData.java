@@ -1,6 +1,5 @@
 package at.roteklaue.portabletunes.items.data;
 
-import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.HolderLookup;
@@ -23,7 +22,7 @@ import java.util.Map;
 public class PortableWorldData extends SavedData {
     private static final String FILE_NAME = "portable_tunes";
 
-    private final Map<List<String>, MixTapeData> mixTapes = new HashMap<>();
+    private final Map<List<String>, MixtapeData> mixTapes = new HashMap<>();
 
     public static PortableWorldData create() {
         return new PortableWorldData();
@@ -61,7 +60,7 @@ public class PortableWorldData extends SavedData {
                 key.add(keyElement.getAsString());
             }
 
-            var mixTapeData = new MixTapeData(
+            var mixTapeData = new MixtapeData(
                     entryTag.getString("PlayerUUID"),
                     entryTag.getString("CachedPlayerName"),
                     entryTag.getString("MixtapeName")
@@ -123,14 +122,14 @@ public class PortableWorldData extends SavedData {
         return tag;
     }
 
-    public void putMixTape(
+    public void putMixtape(
             List<String> songs,
             String playerUUID,
             String playerName,
             String mixtapeName
     ) {
         var key = List.copyOf(songs);
-        var value = new MixTapeData(playerUUID, playerName, mixtapeName);
+        var value = new MixtapeData(playerUUID, playerName, mixtapeName);
 
         if (value.equals(this.mixTapes.get(key))) {
             return;
@@ -140,15 +139,15 @@ public class PortableWorldData extends SavedData {
         this.setDirty();
     }
 
-    public MixTapeData getMixTape(List<String> songs) {
+    public MixtapeData getMixtape(List<String> songs) {
         return this.mixTapes.get(songs);
     }
 
-    public boolean containsMixTape(List<String> songs) {
+    public boolean containsMixtape(List<String> songs) {
         return this.mixTapes.containsKey(songs);
     }
 
-    public void removeMixTape(List<String> songs) {
+    public void removeMixtape(List<String> songs) {
         if (this.mixTapes.remove(songs) == null) {
             return;
         }
@@ -156,37 +155,37 @@ public class PortableWorldData extends SavedData {
         this.setDirty();
     }
 
-    public Map<List<String>, MixTapeData> getMixTapes() {
+    public Map<List<String>, MixtapeData> getMixtapes() {
         return Map.copyOf(this.mixTapes);
     }
 
-    public record MixTapeData(
+    public record MixtapeData(
             String playerUUID,
             String cachedPlayerName,
             String mixtapeName
     ) {
-        public static final Codec<MixTapeData> CODEC =
+        public static final Codec<MixtapeData> CODEC =
                 RecordCodecBuilder.create(instance -> instance.group(
                         Codec.STRING
                                 .fieldOf("player_uuid")
-                                .forGetter(MixTapeData::playerUUID),
+                                .forGetter(MixtapeData::playerUUID),
                         Codec.STRING
                                 .fieldOf("cached_player_name")
-                                .forGetter(MixTapeData::cachedPlayerName),
+                                .forGetter(MixtapeData::cachedPlayerName),
                         Codec.STRING
                                 .fieldOf("mixtape_name")
-                                .forGetter(MixTapeData::mixtapeName)
-                ).apply(instance, MixTapeData::new));
+                                .forGetter(MixtapeData::mixtapeName)
+                ).apply(instance, MixtapeData::new));
 
-        public static final StreamCodec<RegistryFriendlyByteBuf, MixTapeData>
+        public static final StreamCodec<RegistryFriendlyByteBuf, MixtapeData>
                 STREAM_CODEC = StreamCodec.composite(
                 ByteBufCodecs.STRING_UTF8,
-                MixTapeData::playerUUID,
+                MixtapeData::playerUUID,
                 ByteBufCodecs.STRING_UTF8,
-                MixTapeData::cachedPlayerName,
+                MixtapeData::cachedPlayerName,
                 ByteBufCodecs.STRING_UTF8,
-                MixTapeData::mixtapeName,
-                MixTapeData::new
+                MixtapeData::mixtapeName,
+                MixtapeData::new
         );
     }
 }

@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.Map;
 
 public class PortableTabs {
-    static Map<ResourceLocation, List<Holder<Item>>> MAPPED_ITEMS = new HashMap<>();
+    static Map<ResourceLocation, List<Holder<Item>>> ITEMS_BY_TAB = new HashMap<>();
     public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, PortableTunes.MODID);
 
     public static final DeferredHolder<CreativeModeTab, CreativeModeTab> PORTABLE_TUNES = CREATIVE_MODE_TABS.register("portable_tunes", () ->
@@ -30,7 +30,7 @@ public class PortableTabs {
     );
 
     public static void addCreative(BuildCreativeModeTabContentsEvent event) {
-        MAPPED_ITEMS
+        ITEMS_BY_TAB
                 .getOrDefault(event.getTabKey().location(), List.of())
                 .forEach(holder -> event.accept(holder.value()));
     }

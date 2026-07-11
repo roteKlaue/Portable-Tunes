@@ -6,6 +6,7 @@
   "item.portable_tunes.cassette": "Cassette",
   "item.portable_tunes.cassette.blank": "Blank Cassette",
   "item.portable_tunes.cassette.named_mixtape": "%s Mixtape",
+  "item.portable_tunes.cassette.empty": "Use a Tape Deck to record up to 8 songs onto this cassette.",
   "item.portable_tunes.blank_disk": "Blank Disk",
   "item.portable_tunes.cassette.mixtape_by": "By %d",
 

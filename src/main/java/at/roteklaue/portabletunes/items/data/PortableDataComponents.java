@@ -26,13 +26,13 @@ public class PortableDataComponents {
 
     public static final DeferredHolder<
             DataComponentType<?>,
-            DataComponentType<PortableWorldData.MixTapeData>
-            > MIX_TAPE_DATA = COMPONENTS.register(
-            "mix_tape_data",
+            DataComponentType<PortableWorldData.MixtapeData>
+            > MIXTAPE_DATA = COMPONENTS.register(
+            "mixtape_data",
             () -> DataComponentType
-                    .<PortableWorldData.MixTapeData>builder()
-                    .persistent(PortableWorldData.MixTapeData.CODEC)
-                    .networkSynchronized(PortableWorldData.MixTapeData.STREAM_CODEC)
+                    .<PortableWorldData.MixtapeData>builder()
+                    .persistent(PortableWorldData.MixtapeData.CODEC)
+                    .networkSynchronized(PortableWorldData.MixtapeData.STREAM_CODEC)
                     .build()
     );
 

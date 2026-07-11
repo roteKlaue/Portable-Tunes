@@ -22,22 +22,20 @@ public class Cassette extends Item {
                         CassetteContents.EMPTY));
     }
 
+    private static CassetteContents getContents(ItemStack stack) {
+        return stack.getOrDefault(
+                PortableDataComponents.CASSETTE_CONTENTS.get(),
+                CassetteContents.EMPTY
+        );
+    }
+
     public static boolean isEmpty(ItemStack stack) {
-        CassetteContents cassetteContents = stack.get(PortableDataComponents.CASSETTE_CONTENTS.get());
-        if (null == cassetteContents) {
-            return true;
-        }
-        return cassetteContents.isEmpty();
+        return getContents(stack).isEmpty();
     }
 
     @Nonnull
     public static List<JukeboxPlayable> getSongs(@Nonnull ItemStack stack) {
-        CassetteContents contents = stack.getOrDefault(
-                PortableDataComponents.CASSETTE_CONTENTS.get(),
-                CassetteContents.EMPTY
-        );
-
-        return contents.songs();
+        return getContents(stack).songs();
     }
 
     public static boolean addSong(
@@ -57,34 +55,25 @@ public class Cassette extends Item {
             ItemStack stack,
             JukeboxPlayable song
     ) {
-        CassetteContents contents = stack.getOrDefault(
-                PortableDataComponents.CASSETTE_CONTENTS.get(),
-                CassetteContents.EMPTY
-        );
+        CassetteContents contents = getContents(stack);
 
         if (contents.isFull()) return false;
-
-        CassetteContents updatedContents = contents.add(song);
+        CassetteContents updatedContents = contents.add(song.withTooltip(true));
         stack.set(
                 PortableDataComponents.CASSETTE_CONTENTS.get(),
                 updatedContents
         );
 
+        stack.remove(PortableDataComponents.MIXTAPE_DATA.get());
         return true;
     }
 
     public static boolean removeSong(
-            ItemStack stack,
+            @Nonnull ItemStack stack,
             int index
     ) {
-        CassetteContents contents = stack.getOrDefault(
-                PortableDataComponents.CASSETTE_CONTENTS.get(),
-                CassetteContents.EMPTY
-        );
-
-        if (index < 0 || index >= contents.size()) {
-            return false;
-        }
+        CassetteContents contents = getContents(stack);
+        if (index < 0 || index >= contents.size()) return false;
 
         CassetteContents updatedContents = contents.remove(index);
 
@@ -93,37 +82,53 @@ public class Cassette extends Item {
                 updatedContents
         );
 
+        stack.remove(PortableDataComponents.MIXTAPE_DATA.get());
         return true;
     }
 
-    public static boolean saveMixtape(ServerLevel level, ItemStack stack, String name, String playerUUID, String playerName) {
+    public static boolean saveMixtape(
+            @Nonnull ServerLevel level,
+            @Nonnull ItemStack stack,
+            @Nonnull String name,
+            @Nonnull String playerUUID,
+            @Nonnull String playerName
+    ) {
         var songKeys = getSongKeys(stack);
         if (songKeys.isEmpty()) {
-            stack.remove(PortableDataComponents.MIX_TAPE_DATA.get());
+            stack.remove(PortableDataComponents.MIXTAPE_DATA.get());
             return false;
         }
+
+        name = name.trim();
+        if (name.isEmpty()) return false;
 
         var worldData = PortableWorldData.get(level.getServer());
-        var mixTapeData = worldData.getMixTape(songKeys);
-        if (mixTapeData != null) {
-            return false;
-        }
+        var mixtapeData = worldData.getMixtape(songKeys);
+        if (mixtapeData != null) return false;
 
-        worldData.putMixTape(songKeys, playerUUID, playerName, name);
+        worldData.putMixtape(songKeys, playerUUID, playerName, name);
+        mixtapeData = worldData.getMixtape(songKeys);
+        if (mixtapeData == null) return false;
+
+        stack.set(
+                PortableDataComponents.MIXTAPE_DATA.get(),
+                mixtapeData
+        );
+
         return true;
     }
 
     @Nonnull
+    @Override
     public Component getName(@Nonnull ItemStack stack) {
         if (Cassette.isEmpty(stack))
             return Component.translatable("item.portable_tunes.cassette.blank");
 
-        var mixTapeData = stack.get(PortableDataComponents.MIX_TAPE_DATA.get());
-        if (mixTapeData == null || mixTapeData.mixtapeName() == null || mixTapeData.mixtapeName().isBlank()) {
+        var mixtapeData = stack.get(PortableDataComponents.MIXTAPE_DATA.get());
+        if (mixtapeData == null || mixtapeData.mixtapeName() == null || mixtapeData.mixtapeName().isBlank())
             return super.getName(stack);
-        }
 
-        return Component.translatable("item.portable_tunes.cassette.named_mixtape", mixTapeData.mixtapeName());
+        return Component.translatable("item.portable_tunes.cassette.named_mixtape", mixtapeData.mixtapeName());
     }
 
     @Override
@@ -137,30 +142,43 @@ public class Cassette extends Item {
         if (!(level instanceof ServerLevel serverLevel))
             return;
 
+        if ((level.getGameTime() + itemSlot) % 20 != 0) return;
+        updateMixtapeData(serverLevel, stack);
+    }
+
+    private static void updateMixtapeData(
+            ServerLevel level,
+            ItemStack stack
+    ) {
         var songKeys = getSongKeys(stack);
+
         if (songKeys.isEmpty()) {
-            stack.remove(PortableDataComponents.MIX_TAPE_DATA.get());
+            stack.remove(PortableDataComponents.MIXTAPE_DATA.get());
             return;
         }
 
-        var worldData = PortableWorldData.get(serverLevel.getServer());
-        var mixTapeData = worldData.getMixTape(songKeys);
-        if (mixTapeData == null) {
-            stack.remove(PortableDataComponents.MIX_TAPE_DATA.get());
+        var worldData = PortableWorldData.get(level.getServer());
+        var mixtapeData = worldData.getMixtape(songKeys);
+
+        if (mixtapeData == null) {
+            stack.remove(PortableDataComponents.MIXTAPE_DATA.get());
             return;
         }
 
-        var currentData = stack.get(PortableDataComponents.MIX_TAPE_DATA.get());
-        if (mixTapeData.equals(currentData)) return;
+        var currentData = stack.get(PortableDataComponents.MIXTAPE_DATA.get());
 
-        stack.set(PortableDataComponents.MIX_TAPE_DATA.get(), mixTapeData);
+        if (mixtapeData.equals(currentData)) return;
+        stack.set(
+                PortableDataComponents.MIXTAPE_DATA.get(),
+                mixtapeData
+        );
     }
 
     @Nonnull
     private static List<String> getSongKeys(@Nonnull ItemStack stack) {
         return Cassette.getSongs(stack)
                 .stream()
-                .map(p -> p.song().key().location().toString())
+                .map(playable -> playable.song().key().location().toString())
                 .toList();
     }
 
@@ -170,19 +188,22 @@ public class Cassette extends Item {
                                 @Nonnull Item.TooltipContext context,
                                 @Nonnull List<Component> tooltipComponents,
                                 @Nonnull TooltipFlag tooltipFlag) {
-        if (Cassette.isEmpty(stack)) return;
-        var mixTapeData = stack.get(PortableDataComponents.MIX_TAPE_DATA.get());
-        if (mixTapeData != null) {
-            tooltipComponents.add(Component.translatable("item.portable_tunes.cassette.mixtape_by", mixTapeData.cachedPlayerName())
+        if (Cassette.isEmpty(stack)) {
+            tooltipComponents.add(Component.translatable("item.portable_tunes.cassette.empty")
+                    .withStyle(ChatFormatting.GRAY));
+            return;
+        }
+        var mixtapeData = stack.get(PortableDataComponents.MIXTAPE_DATA.get());
+        if (mixtapeData != null) {
+            tooltipComponents.add(Component.translatable("item.portable_tunes.cassette.mixtape_by", mixtapeData.cachedPlayerName())
                     .withStyle(ChatFormatting.BLUE));
         }
         var songs = getSongs(stack);
-        songs.forEach(e -> e.addToTooltip(context, tooltipComponents::add, tooltipFlag));
+        songs.forEach(song -> song.addToTooltip(context, tooltipComponents::add, tooltipFlag));
     }
 
     @Override
     public boolean isFoil(@Nonnull ItemStack stack) {
-        var mixTapeData = stack.get(PortableDataComponents.MIX_TAPE_DATA.get());
-        return mixTapeData != null;
+        return stack.has(PortableDataComponents.MIXTAPE_DATA.get());
     }
 }

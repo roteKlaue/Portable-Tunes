@@ -123,7 +123,7 @@ public class PortableCommands {
                                     var worldData = PortableWorldData.get(
                                             source.getServer()
                                     );
-                                    var mixTapes = worldData.getMixTapes();
+                                    var mixTapes = worldData.getMixtapes();
 
                                     if (mixTapes.isEmpty()) {
                                         source.sendSuccess(
