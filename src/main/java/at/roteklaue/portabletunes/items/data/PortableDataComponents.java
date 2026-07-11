@@ -24,6 +24,18 @@ public class PortableDataComponents {
                     .networkSynchronized(CassetteContents.STREAM_CODEC)
     );
 
+    public static final DeferredHolder<
+            DataComponentType<?>,
+            DataComponentType<PortableWorldData.MixTapeData>
+            > MIX_TAPE_DATA = COMPONENTS.register(
+            "mix_tape_data",
+            () -> DataComponentType
+                    .<PortableWorldData.MixTapeData>builder()
+                    .persistent(PortableWorldData.MixTapeData.CODEC)
+                    .networkSynchronized(PortableWorldData.MixTapeData.STREAM_CODEC)
+                    .build()
+    );
+
     public static void register(IEventBus bus) {
         COMPONENTS.register(bus);
     }

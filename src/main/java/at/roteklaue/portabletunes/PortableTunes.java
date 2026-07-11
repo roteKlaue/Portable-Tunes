@@ -1,6 +1,7 @@
 package at.roteklaue.portabletunes;
 
 import at.roteklaue.portabletunes.blocks.PortableBlocks;
+import at.roteklaue.portabletunes.commands.PortableCommands;
 import at.roteklaue.portabletunes.items.PortableItems;
 import at.roteklaue.portabletunes.items.PortableTabs;
 import at.roteklaue.portabletunes.items.data.PortableDataComponents;
@@ -22,7 +23,7 @@ import org.slf4j.Logger;
 @Mod(PortableTunes.MODID)
 public class PortableTunes {
     public static final String MODID = "portable_tunes";
-    private static final Logger LOGGER = LogUtils.getLogger();
+    public static final Logger LOGGER = LogUtils.getLogger();
 
     public PortableTunes(IEventBus modEventBus, ModContainer modContainer) {
         modEventBus.addListener(this::commonSetup);
@@ -33,6 +34,7 @@ public class PortableTunes {
         PortableTabs.register(modEventBus);
 
         NeoForge.EVENT_BUS.register(this);
+        NeoForge.EVENT_BUS.addListener(PortableCommands::register);
         modEventBus.addListener(PortableTabs::addCreative);
         modContainer.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
     }

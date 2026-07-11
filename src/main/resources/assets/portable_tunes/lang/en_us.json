@@ -3,6 +3,23 @@
 
   "block.portable_tunes.tape_deck": "Tape Deck",
 
-  "item.portable_tunes.blank_cassette": "Blank Cassette",
-  "item.portable_tunes.blank_disk": "Blank Disk"
+  "item.portable_tunes.cassette": "Cassette",
+  "item.portable_tunes.cassette.blank": "Blank Cassette",
+  "item.portable_tunes.cassette.named_mixtape": "%s Mixtape",
+  "item.portable_tunes.blank_disk": "Blank Disk",
+  "item.portable_tunes.cassette.mixtape_by": "By %d",
+
+  "commands.portable_tunes.hold_cassette": "Hold a cassette in your main hand.",
+  "commands.portable_tunes.add_song.success": "Added %s to the cassette.",
+  "commands.portable_tunes.not_playable": "Hold a music disc in your offhand.",
+  "commands.portable_tunes.unknown_song": "Could not resolve the song.",
+  "commands.portable_tunes.cassette_full": "The cassette is full.",
+  "commands.portable_tunes.save_mixtape.success": "Created %s Mixtape with %s songs.",
+  "commands.portable_tunes.save_mixtape.no_songs": "The cassette contains no songs.",
+  "commands.portable_tunes.save_mixtape.already_mixtape_with_these_songs": "There already is a mixtape registered with these songs.",
+  "commands.portable_tunes.list_mixtapes.empty": "No mixtapes have been saved.",
+  "commands.portable_tunes.list_mixtapes.header": "Saved mixtapes (%s):",
+  "commands.portable_tunes.list_mixtapes.entry": " by %s — %s songs",
+  "commands.portable_tunes.clear_mixtapes.empty": "There are no saved mixtapes to clear.",
+  "commands.portable_tunes.clear_mixtapes.success": "Cleared %s saved mixtapes."
 }
