@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:blasting",
+  "category": "misc",
+  "ingredient": {
+    "item": "portable_tunes:broken_disc"
+  },
+  "result": {
+    "id": "portable_tunes:blank_disc"
+  },
+  "experience": 0.2,
+  "cookingtime": 100
+}
