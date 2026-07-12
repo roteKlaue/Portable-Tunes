@@ -1,5 +1,6 @@
 package at.roteklaue.portabletunes.items;
 
+import at.roteklaue.portabletunes.Config;
 import at.roteklaue.portabletunes.items.data.CassetteContents;
 import at.roteklaue.portabletunes.items.data.PortableDataComponents;
 import at.roteklaue.portabletunes.items.data.PortableWorldData;
@@ -189,7 +190,7 @@ public class Cassette extends Item {
                                 @Nonnull List<Component> tooltipComponents,
                                 @Nonnull TooltipFlag tooltipFlag) {
         if (Cassette.isEmpty(stack)) {
-            tooltipComponents.add(Component.translatable("item.portable_tunes.cassette.empty")
+            tooltipComponents.add(Component.translatable("item.portable_tunes.cassette.empty", Config.MAX_MIXTAPE_LENGTH.get())
                     .withStyle(ChatFormatting.GRAY));
             return;
         }
