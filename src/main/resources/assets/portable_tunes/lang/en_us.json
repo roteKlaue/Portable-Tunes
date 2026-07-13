@@ -33,9 +33,13 @@
 
   "portable_tunes.configuration.tape_deck": "Tape Deck",
   "portable_tunes.configuration.mixtape": "Mixtape",
+  "portable_tunes.configuration.cassette_player": "Cassette Player",
   "config.portable_tunes.output_disc_damage_chance": "Output Disc Damage Chance",
+  "config.portable_tunes.transcription_time": "Transcription Time",
   "config.portable_tunes.output_cassette_damage_chance": "Output Cassette Damage Chance",
   "config.portable_tunes.input_disc_damage_chance": "Input Disc Damage Chance",
+  "config.portable_tunes.input_disc_interruption_damage_chance": "Input Disc Interruption Damage Chance",
   "config.portable_tunes.min_mixtape_length": "Minimum Mixtape Length",
-  "config.portable_tunes.max_mixtape_length": "Maximum Mixtape Length"
+  "config.portable_tunes.max_mixtape_length": "Maximum Mixtape Length",
+  "config.portable_tunes.show_song_change_notification": "Show Song Change Notification"
 }

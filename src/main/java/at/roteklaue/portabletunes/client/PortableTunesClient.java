@@ -7,15 +7,9 @@ import net.neoforged.fml.common.Mod;
 import net.neoforged.neoforge.client.gui.ConfigurationScreen;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 
-@Mod(
-        value = PortableTunes.MODID,
-        dist = Dist.CLIENT
-)
+@Mod(value = PortableTunes.MODID, dist = Dist.CLIENT)
 public class PortableTunesClient {
     public PortableTunesClient(ModContainer modContainer) {
-        modContainer.registerExtensionPoint(
-                IConfigScreenFactory.class,
-                ConfigurationScreen::new
-        );
+        modContainer.registerExtensionPoint(IConfigScreenFactory.class, ConfigurationScreen::new);
     }
 }

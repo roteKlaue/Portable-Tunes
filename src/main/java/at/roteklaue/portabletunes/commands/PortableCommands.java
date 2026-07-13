@@ -14,6 +14,7 @@ public class PortableCommands {
         event.getDispatcher().register(
                 Commands.literal("portabletunes")
                         .then(Commands.literal("add-song")
+                                .requires(source -> source.hasPermission(2))
                                 .executes(context -> {
                                     var source = context.getSource();
                                     var player = source.getPlayerOrException();
@@ -78,6 +79,7 @@ public class PortableCommands {
                                 }))
                         .then(
                                 Commands.literal("save-mixtape")
+                                        .requires(source -> source.hasPermission(2))
                                         .then(
                                                 Commands.argument(
                                                         "name",
@@ -183,7 +185,7 @@ public class PortableCommands {
                                     var worldData = PortableWorldData.get(
                                             source.getServer()
                                     );
-                                    var removedCount = worldData.clearMixTapes();
+                                    var removedCount = worldData.clearMixtapes();
 
                                     if (removedCount == 0) {
                                         source.sendSuccess(

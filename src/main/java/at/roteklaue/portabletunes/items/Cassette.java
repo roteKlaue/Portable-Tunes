@@ -107,7 +107,9 @@ public class Cassette extends Item {
         var mixtapeData = worldData.getMixtape(songKeys);
         if (mixtapeData != null) return false;
 
-        worldData.putMixtape(songKeys, playerUUID, playerName, name);
+        boolean success = worldData.putMixtape(songKeys, playerUUID, playerName, name);
+        if (!success) return false;
+
         mixtapeData = worldData.getMixtape(songKeys);
         if (mixtapeData == null) return false;
 

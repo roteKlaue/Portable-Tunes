@@ -1,6 +1,8 @@
 package at.roteklaue.portabletunes.blocks.entities;
 
+import at.roteklaue.portabletunes.Config;
 import at.roteklaue.portabletunes.client.menus.TapeDeckMenu;
+import at.roteklaue.portabletunes.items.Cassette;
 import at.roteklaue.portabletunes.items.PortableItems;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
@@ -10,6 +12,7 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.world.Containers;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -28,8 +31,12 @@ public class TapeDeckBlockEntity
     private static final String INVENTORY_TAG = "TapeDeckInventory";
 
     private static final int MAX_PROGRESS = 100;
-    private int progress;
+    private double progress;
     private boolean processing;
+    private static Double PROGRESS_PER_TICK = null;
+    private static Double INPUT_DAMAGE_CHANCE = null;
+    private static Double OUTPUT_DAMAGE_CHANCE = null;
+    private static Double CASSETTE_DAMAGE_CHANCE = null;
 
     private final ItemStackHandler inventory = new ItemStackHandler(INVENTORY_SIZE) {
         @Override
@@ -74,10 +81,7 @@ public class TapeDeckBlockEntity
         }
     };
 
-    public TapeDeckBlockEntity(
-            BlockPos blockPos,
-            BlockState blockState
-    ) {
+    public TapeDeckBlockEntity(BlockPos blockPos, BlockState blockState) {
         super(
                 PortableBlockEntities.TAPE_DECK.get(),
                 blockPos,
@@ -87,6 +91,10 @@ public class TapeDeckBlockEntity
                 TapeDeckBlockEntity.class
         );
         processing = false;
+        if (PROGRESS_PER_TICK == null) PROGRESS_PER_TICK = MAX_PROGRESS / 20.0 /* ticks */ / Config.TRANSCRIPTION_TIME.get();
+        if (INPUT_DAMAGE_CHANCE == null) INPUT_DAMAGE_CHANCE = Config.INPUT_DISC_DAMAGE_CHANCE.get();
+        if (OUTPUT_DAMAGE_CHANCE == null) OUTPUT_DAMAGE_CHANCE = Config.OUTPUT_DISC_DAMAGE_CHANCE.get();
+        if (CASSETTE_DAMAGE_CHANCE == null) CASSETTE_DAMAGE_CHANCE = Config.OUTPUT_CASSETTE_DAMAGE_CHANCE.get();
     }
 
     public static void tick(
@@ -95,28 +103,51 @@ public class TapeDeckBlockEntity
             BlockState blockState,
             TapeDeckBlockEntity blockEntity
     ) {
-        if (level.isClientSide()) {
-            return;
-        }
-
-        // blockEntity.serverTick();
+        if (level.isClientSide()) return;
+        blockEntity.serverTick();
     }
 
-    // private void serverTick() {
-    //     if (!canProcess()) {
-    //         resetProgress();
-    //         return;
-    //     }
-//
-    //     progress++;
-//
-    //     if (progress < maxProgress) {
-    //         return;
-    //     }
-//
-    //     processItems();
-    //     resetProgress();
-    // }
+    public boolean isProcessing() {
+        return processing;
+    }
+
+    private void serverTick() {
+        if (!processing || level == null) return;
+
+        progress += PROGRESS_PER_TICK;
+        if (progress < MAX_PROGRESS) return;
+
+        ItemStack inputDiscStack = inventory.getStackInSlot(INPUT_DISC_SLOT);
+        ItemStack outputDiscStack = inventory.getStackInSlot(OUTPUT_DISC_SLOT);
+        ItemStack cassetteStack = inventory.getStackInSlot(CASSETTE_SLOT);
+
+        if (!inputDiscStack.isEmpty() && !outputDiscStack.isEmpty()) {
+            inventory.setStackInSlot(OUTPUT_DISC_SLOT, inputDiscStack.copyWithCount(1));
+        }
+
+        if (cassetteStack.is(PortableItems.CASSETTE)) {
+            var playable = inputDiscStack.get(DataComponents.JUKEBOX_PLAYABLE);
+
+            if (playable != null) {
+                Cassette.addSong(cassetteStack, playable);
+            }
+        }
+
+        damageSlot(INPUT_DISC_SLOT, INPUT_DAMAGE_CHANCE, PortableItems.BROKEN_DISC.get());
+        damageSlot(OUTPUT_DISC_SLOT, OUTPUT_DAMAGE_CHANCE, PortableItems.BROKEN_DISC.get());
+        damageSlot(CASSETTE_SLOT, CASSETTE_DAMAGE_CHANCE, PortableItems.BROKEN_CASSETTE.get());
+
+        processing = false;
+        progress = 0;
+        setChanged();
+    }
+
+    private void damageSlot(int slot, double damageChance, Item brokenItem) {
+        if (inventory.getStackInSlot(slot).isEmpty()) return;
+        if (level == null) return;
+        if (level.getRandom().nextDouble() >= damageChance) return;
+        inventory.setStackInSlot(slot, new ItemStack(brokenItem));
+    }
 
     @Override
     protected void saveAdditional(
@@ -126,7 +157,7 @@ public class TapeDeckBlockEntity
         super.saveAdditional(tag, registries);
 
         tag.put(INVENTORY_TAG, inventory.serializeNBT(registries));
-        tag.putInt("Progress", progress);
+        tag.putDouble("Progress", progress);
         tag.putBoolean("Processing", processing);
     }
 
@@ -170,7 +201,7 @@ public class TapeDeckBlockEntity
             );
         }
 
-        progress = tag.getInt("Progress");
+        progress = tag.getDouble("Progress");
         processing = tag.getBoolean("Processing");
     }
 
@@ -180,9 +211,7 @@ public class TapeDeckBlockEntity
 
     @Override
     @Nonnull
-    public CompoundTag getUpdateTag(
-            @Nonnull HolderLookup.Provider registries
-    ) {
+    public CompoundTag getUpdateTag(@Nonnull HolderLookup.Provider registries) {
         CompoundTag tag = new CompoundTag();
         saveAdditional(tag, registries);
         return tag;

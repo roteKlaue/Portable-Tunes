@@ -15,38 +15,23 @@ import java.util.function.Supplier;
 
 public class PortableMenus {
     public static final DeferredRegister<MenuType<?>> MENUS =
-            DeferredRegister.create(
-                    Registries.MENU,
-                    PortableTunes.MODID
-            );
+            DeferredRegister.create(Registries.MENU, PortableTunes.MODID);
 
     public static final Supplier<MenuType<TapeDeckMenu>> TAPE_DECK =
-            MENUS.register(
-                    "tape_deck",
-                    () -> new MenuType<>(
-                            TapeDeckMenu::new,
-                            FeatureFlags.DEFAULT_FLAGS
-                    )
-            );
-
-    private PortableMenus() {
-    }
+            MENUS.register("tape_deck", () -> new MenuType<>(
+                    TapeDeckMenu::new,
+                    FeatureFlags.DEFAULT_FLAGS
+            ));
 
     public static void register(IEventBus eventBus) {
         MENUS.register(eventBus);
     }
 
-    @EventBusSubscriber(
-            modid = PortableTunes.MODID,
-            value = Dist.CLIENT
-    )
+    @EventBusSubscriber(modid = PortableTunes.MODID, value = Dist.CLIENT)
     public static class PortableScreens {
         @SubscribeEvent
         public static void registerScreens(RegisterMenuScreensEvent event) {
-            event.register(
-                    PortableMenus.TAPE_DECK.get(),
-                    TapeDeckScreen::new
-            );
+            event.register(PortableMenus.TAPE_DECK.get(), TapeDeckScreen::new);
         }
     }
 }

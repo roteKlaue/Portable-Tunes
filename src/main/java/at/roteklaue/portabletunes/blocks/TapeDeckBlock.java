@@ -24,6 +24,7 @@ import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.material.PushReaction;
 import net.minecraft.world.phys.BlockHitResult;
+import net.neoforged.neoforge.items.IItemHandler;
 import org.jetbrains.annotations.Nullable;
 
 import javax.annotation.Nonnull;
@@ -48,7 +49,7 @@ public class TapeDeckBlock extends BaseEntityBlock implements EntityBlock {
     }
 
     public TapeDeckBlock() {
-        super(BlockBehaviour.Properties.of()
+        super(Properties.of()
                 .ignitedByLava()
                 .mapColor(MapColor.WOOD)
                 .strength(2.0F, 3.0F)
@@ -207,9 +208,39 @@ public class TapeDeckBlock extends BaseEntityBlock implements EntityBlock {
 
         BlockPos mainPos = getMainPos(state, blockPos);
         BlockEntity blockEntity = level.getBlockEntity(mainPos);
-        if (!(blockEntity instanceof MenuProvider menuProvider)) return InteractionResult.PASS;
 
-        player.openMenu(menuProvider);
+        if (!(blockEntity instanceof TapeDeckBlockEntity tapeDeck)) return InteractionResult.PASS;
+
+        ItemStack heldStack = player.getMainHandItem();
+        if (heldStack.isEmpty()) heldStack = player.getOffhandItem();
+
+        int slotToCheck = switch (state.getValue(PART)) {
+            case LEFT -> 0;
+            case RIGHT -> 1;
+        };
+
+        IItemHandler handler = tapeDeck.getInventory();
+        if (!heldStack.isEmpty()
+                && handler.getStackInSlot(slotToCheck).isEmpty()
+                && handler.isItemValid(slotToCheck, heldStack)) {
+            ItemStack stackToInsert = heldStack.copyWithCount(1);
+            ItemStack remainder = handler.insertItem(
+                    slotToCheck,
+                    stackToInsert,
+                    false
+            );
+
+            if (remainder.isEmpty()) {
+                if (!player.getAbilities().instabuild) {
+                    heldStack.shrink(1);
+                }
+
+                tapeDeck.setChanged();
+                return InteractionResult.CONSUME;
+            }
+        }
+
+        player.openMenu(tapeDeck);
         return InteractionResult.CONSUME;
     }
 

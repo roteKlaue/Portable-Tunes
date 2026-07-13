@@ -142,26 +142,15 @@ public class TapeDeckMenu extends AbstractContainerMenu {
 
     @Override
     @Nonnull
-    public ItemStack quickMoveStack(
-            @Nonnull Player player,
-            int slotIndex
-    ) {
-        if (slotIndex < 0 || slotIndex >= slots.size()) {
-            return ItemStack.EMPTY;
-        }
+    public ItemStack quickMoveStack(@Nonnull Player player, int slotIndex) {
+        if (slotIndex < 0 || slotIndex >= slots.size()) return ItemStack.EMPTY;
 
         Slot sourceSlot = slots.get(slotIndex);
-
-        if (!sourceSlot.hasItem()) {
-            return ItemStack.EMPTY;
-        }
+        if (!sourceSlot.hasItem()) return ItemStack.EMPTY;
 
         ItemStack sourceStack = sourceSlot.getItem();
         ItemStack originalStack = sourceStack.copy();
-
-        if (!moveStackFromSlot(slotIndex, sourceStack)) {
-            return ItemStack.EMPTY;
-        }
+        if (!moveStackFromSlot(slotIndex, sourceStack)) return ItemStack.EMPTY;
 
         if (sourceStack.isEmpty()) {
             sourceSlot.set(ItemStack.EMPTY);
@@ -169,18 +158,13 @@ public class TapeDeckMenu extends AbstractContainerMenu {
             sourceSlot.setChanged();
         }
 
-        if (sourceStack.getCount() == originalStack.getCount()) {
-            return ItemStack.EMPTY;
-        }
+        if (sourceStack.getCount() == originalStack.getCount()) return ItemStack.EMPTY;
 
         sourceSlot.onTake(player, sourceStack);
         return originalStack;
     }
 
-    private boolean moveStackFromSlot(
-            int slotIndex,
-            ItemStack stack
-    ) {
+    private boolean moveStackFromSlot(int slotIndex, ItemStack stack) {
         if (isTapeDeckSlot(slotIndex)) {
             return moveItemStackTo(
                     stack,
@@ -191,9 +175,7 @@ public class TapeDeckMenu extends AbstractContainerMenu {
         }
 
         if (isPlayerInventorySlot(slotIndex)) {
-            if (moveItemToTapeDeck(stack)) {
-                return true;
-            }
+            if (moveItemToTapeDeck(stack)) return true;
 
             return moveItemStackTo(
                     stack,
@@ -204,9 +186,7 @@ public class TapeDeckMenu extends AbstractContainerMenu {
         }
 
         if (isHotbarSlot(slotIndex)) {
-            if (moveItemToTapeDeck(stack)) {
-                return true;
-            }
+            if (moveItemToTapeDeck(stack)) return true;
 
             return moveItemStackTo(
                     stack,
@@ -243,13 +223,8 @@ public class TapeDeckMenu extends AbstractContainerMenu {
                 && slotIndex < HOTBAR_SLOT_END;
     }
 
-    private static void checkInventorySize(
-            IItemHandler inventory,
-            int expectedSize
-    ) {
-        if (inventory.getSlots() == expectedSize) {
-            return;
-        }
+    private static void checkInventorySize(IItemHandler inventory, int expectedSize) {
+        if (inventory.getSlots() == expectedSize) return;
 
         throw new IllegalArgumentException(
                 "Expected an inventory with "

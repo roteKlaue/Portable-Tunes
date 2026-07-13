@@ -1,5 +1,6 @@
 package at.roteklaue.portabletunes.items.data;
 
+import at.roteklaue.portabletunes.Config;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.HolderLookup;
@@ -28,7 +29,7 @@ public class PortableWorldData extends SavedData {
         return new PortableWorldData();
     }
 
-    public int clearMixTapes() {
+    public int clearMixtapes() {
         if (this.mixTapes.isEmpty()) {
             return 0;
         }
@@ -122,21 +123,24 @@ public class PortableWorldData extends SavedData {
         return tag;
     }
 
-    public void putMixtape(
+    public boolean putMixtape(
             List<String> songs,
             String playerUUID,
             String playerName,
             String mixtapeName
     ) {
+        var songCount = songs.size();
+        if (songCount < Config.getMinimumMixtapeLength()) return false;
+        if (songCount > Config.getMaximumMixtapeLength()) return false;
+
         var key = List.copyOf(songs);
         var value = new MixtapeData(playerUUID, playerName, mixtapeName);
 
-        if (value.equals(this.mixTapes.get(key))) {
-            return;
-        }
+        if (value.equals(this.mixTapes.get(key))) return false;
 
         this.mixTapes.put(key, value);
         this.setDirty();
+        return true;
     }
 
     public MixtapeData getMixtape(List<String> songs) {

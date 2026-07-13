@@ -30,6 +30,7 @@ public class PortableTunes {
 
         NeoForge.EVENT_BUS.addListener(PortableCommands::register);
         modEventBus.addListener(PortableTabs::addCreative);
-        modContainer.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
+        modContainer.registerConfig(ModConfig.Type.SERVER, Config.SERVER_SPEC);
+        modContainer.registerConfig(ModConfig.Type.CLIENT, Config.ClientConfig.CLIENT_SPEC);
     }
 }

@@ -10,6 +10,13 @@ group = mod_group_id
 
 repositories {
     mavenLocal()
+
+    maven {
+        url = "https://www.cursemaven.com"
+        content {
+            includeGroup "curse.maven"
+        }
+    }
 }
 
 base {
@@ -106,6 +113,14 @@ dependencies {
     // This maps to ./libs/coolmod-${mc_version}-${coolmod_version}.jar
     // The group id is ignored when searching -- in this case, it is "blank"
     // implementation "blank:coolmod-${mc_version}:${coolmod_version}"
+    def moonlight = "curse.maven:selene-499980:8419104"
+    def amendments = "curse.maven:amendments-896746:8415430"
+
+    compileOnly moonlight
+    runtimeOnly moonlight
+
+    compileOnly amendments
+    runtimeOnly amendments
 
     // Example mod dependency using a file as dependency
     // implementation files("libs/coolmod-${mc_version}-${coolmod_version}.jar")
