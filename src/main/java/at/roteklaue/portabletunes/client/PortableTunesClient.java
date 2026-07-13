@@ -11,7 +11,7 @@ import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
         value = PortableTunes.MODID,
         dist = Dist.CLIENT
 )
-public final class PortableTunesClient {
+public class PortableTunesClient {
     public PortableTunesClient(ModContainer modContainer) {
         modContainer.registerExtensionPoint(
                 IConfigScreenFactory.class,

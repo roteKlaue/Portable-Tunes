@@ -1,0 +1,35 @@
+{
+  "variants": {
+    "facing=north,part=left": {
+      "model": "portable_tunes:block/tape_deck_left"
+    },
+    "facing=east,part=left": {
+      "model": "portable_tunes:block/tape_deck_left",
+      "y": 90
+    },
+    "facing=south,part=left": {
+      "model": "portable_tunes:block/tape_deck_left",
+      "y": 180
+    },
+    "facing=west,part=left": {
+      "model": "portable_tunes:block/tape_deck_left",
+      "y": 270
+    },
+
+    "facing=north,part=right": {
+      "model": "portable_tunes:block/tape_deck_right"
+    },
+    "facing=east,part=right": {
+      "model": "portable_tunes:block/tape_deck_right",
+      "y": 90
+    },
+    "facing=south,part=right": {
+      "model": "portable_tunes:block/tape_deck_right",
+      "y": 180
+    },
+    "facing=west,part=right": {
+      "model": "portable_tunes:block/tape_deck_right",
+      "y": 270
+    }
+  }
+}

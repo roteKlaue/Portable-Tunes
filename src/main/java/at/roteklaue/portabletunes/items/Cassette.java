@@ -190,7 +190,7 @@ public class Cassette extends Item {
                                 @Nonnull List<Component> tooltipComponents,
                                 @Nonnull TooltipFlag tooltipFlag) {
         if (Cassette.isEmpty(stack)) {
-            tooltipComponents.add(Component.translatable("item.portable_tunes.cassette.empty", Config.MAX_MIXTAPE_LENGTH.get())
+            tooltipComponents.add(Component.translatable("item.portable_tunes.cassette.empty", Config.getMaximumMixtapeLength())
                     .withStyle(ChatFormatting.GRAY));
             return;
         }

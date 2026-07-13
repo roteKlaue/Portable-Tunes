@@ -20,12 +20,8 @@ import java.util.function.Supplier;
 public class PortableBlocks {
     public static final DeferredRegister.Blocks BLOCKS = DeferredRegister.createBlocks(PortableTunes.MODID);
 
-    public static final DeferredBlock<TapeDeck> TAPE_DECK = registerBlock("tape_deck", TapeDeck::new,
+    public static final DeferredBlock<TapeDeckBlock> TAPE_DECK = registerBlock("tape_deck", TapeDeckBlock::new,
             List.of(PortableTabs.PORTABLE_TUNES.getId(), CreativeModeTabs.BUILDING_BLOCKS.location()));
-
-    public static <T extends Block> DeferredBlock<T> registerBlock(String identifier, Supplier<T> supplier) {
-        return registerBlock(identifier, supplier, List.of());
-    }
 
     public static <T extends Block> DeferredBlock<T> registerBlock(String identifier, Supplier<T> supplier, List<ResourceLocation> creativeTabs) {
         var block = BLOCKS.register(identifier, supplier);

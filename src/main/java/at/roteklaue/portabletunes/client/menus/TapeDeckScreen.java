@@ -1,0 +1,28 @@
+package at.roteklaue.portabletunes.client.menus;
+
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.player.Inventory;
+
+public class TapeDeckScreen
+        extends AbstractContainerScreen<TapeDeckMenu> {
+
+    public TapeDeckScreen(
+            TapeDeckMenu menu,
+            Inventory inventory,
+            Component title
+    ) {
+        super(menu, inventory, title);
+    }
+
+    @Override
+    protected void renderBg(
+            GuiGraphics graphics,
+            float partialTick,
+            int mouseX,
+            int mouseY
+    ) {}
+
+
+}

@@ -1,5 +1,6 @@
 package at.roteklaue.portabletunes.items.data;
 
+import at.roteklaue.portabletunes.Config;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -11,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public record CassetteContents(List<JukeboxPlayable> songs) {
-    public static final int MAX_SONGS = 8;
+    public static final int TECHNICAL_MAX_SONGS = 64;
 
     public static final CassetteContents EMPTY =
             new CassetteContents(List.of());
@@ -24,15 +25,15 @@ public record CassetteContents(List<JukeboxPlayable> songs) {
 
     public static final StreamCodec<RegistryFriendlyByteBuf, CassetteContents> STREAM_CODEC =
             JukeboxPlayable.STREAM_CODEC
-                    .apply(ByteBufCodecs.list(MAX_SONGS))
+                    .apply(ByteBufCodecs.list(TECHNICAL_MAX_SONGS))
                     .map(CassetteContents::new, CassetteContents::songs);
 
     public CassetteContents {
         songs = List.copyOf(songs);
 
-        if (songs.size() > MAX_SONGS) {
+        if (songs.size() > TECHNICAL_MAX_SONGS) {
             throw new IllegalArgumentException(
-                    "A cassette cannot contain more than " + MAX_SONGS + " songs"
+                    "A cassette cannot contain more than " + TECHNICAL_MAX_SONGS + " songs"
             );
         }
     }
@@ -40,17 +41,17 @@ public record CassetteContents(List<JukeboxPlayable> songs) {
     private static DataResult<List<JukeboxPlayable>> validateSongs(
             List<JukeboxPlayable> songs
     ) {
-        if (songs.size() <= MAX_SONGS) {
+        if (songs.size() <= Math.min(TECHNICAL_MAX_SONGS, Config.getMaximumMixtapeLength())) {
             return DataResult.success(songs);
         }
 
         return DataResult.error(() ->
-                "A cassette cannot contain more than " + MAX_SONGS + " songs"
+                "A cassette cannot contain more than " + Math.min(TECHNICAL_MAX_SONGS, Config.getMaximumMixtapeLength()) + " songs"
         );
     }
 
     public boolean isFull() {
-        return songs.size() >= MAX_SONGS;
+        return songs.size() >= Math.min(TECHNICAL_MAX_SONGS, Config.getMaximumMixtapeLength());
     }
 
     public boolean isEmpty() {

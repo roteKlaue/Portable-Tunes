@@ -1,5 +1,6 @@
 package at.roteklaue.portabletunes;
 
+import at.roteklaue.portabletunes.items.data.CassetteContents;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.event.config.ModConfigEvent;
@@ -50,12 +51,12 @@ public final class Config {
         MIN_MIXTAPE_LENGTH = BUILDER
                 .comment("The minimum number of tracks required for a mixtape.")
                 .translation("config.portable_tunes.min_mixtape_length")
-                .defineInRange("minMixtapeLength", 1, 1, Integer.MAX_VALUE);
+                .defineInRange("minMixtapeLength", 1, 1, CassetteContents.TECHNICAL_MAX_SONGS);
 
         MAX_MIXTAPE_LENGTH = BUILDER
                 .comment("The maximum number of tracks allowed on a mixtape.")
                 .translation("config.portable_tunes.max_mixtape_length")
-                .defineInRange("maxMixtapeLength", 8, 1, Integer.MAX_VALUE);
+                .defineInRange("maxMixtapeLength", 8, 1, CassetteContents.TECHNICAL_MAX_SONGS);
 
         BUILDER.pop();
     }
@@ -64,5 +65,19 @@ public final class Config {
 
     @SubscribeEvent
     static void onLoad(final ModConfigEvent event) {
+    }
+
+    public static int getMinimumMixtapeLength() {
+        return Math.min(
+                MIN_MIXTAPE_LENGTH.get(),
+                MAX_MIXTAPE_LENGTH.get()
+        );
+    }
+
+    public static int getMaximumMixtapeLength() {
+        return Math.max(
+                MIN_MIXTAPE_LENGTH.get(),
+                MAX_MIXTAPE_LENGTH.get()
+        );
     }
 }

@@ -2,11 +2,12 @@
   "itemGroup.portable_tunes": "Portable Tunes",
 
   "block.portable_tunes.tape_deck": "Tape Deck",
+  "container.portable_tunes.tape_deck": "Tape Deck",
 
   "item.portable_tunes.cassette": "Cassette",
   "item.portable_tunes.cassette.blank": "Blank Cassette",
   "item.portable_tunes.cassette.named_mixtape": "%s Mixtape",
-  "item.portable_tunes.cassette.empty": "Use a Tape Deck to record up to 8 songs onto this cassette.",
+  "item.portable_tunes.cassette.empty": "Use a Tape Deck to record up to %s songs onto this cassette.",
   "item.portable_tunes.cassette.mixtape_by": "By %s",
   "item.portable_tunes.blank_disc": "Blank Disc",
   "item.portable_tunes.blank_disc.desc": "Use a Tape Deck to copy a music disc onto this blank disc.",
@@ -28,5 +29,13 @@
   "commands.portable_tunes.list_mixtapes.header": "Saved mixtapes (%s):",
   "commands.portable_tunes.list_mixtapes.entry": " by %s — %s songs",
   "commands.portable_tunes.clear_mixtapes.empty": "There are no saved mixtapes to clear.",
-  "commands.portable_tunes.clear_mixtapes.success": "Cleared %s saved mixtapes."
+  "commands.portable_tunes.clear_mixtapes.success": "Cleared %s saved mixtapes.",
+
+  "portable_tunes.configuration.tape_deck": "Tape Deck",
+  "portable_tunes.configuration.mixtape": "Mixtape",
+  "config.portable_tunes.output_disc_damage_chance": "Output Disc Damage Chance",
+  "config.portable_tunes.output_cassette_damage_chance": "Output Cassette Damage Chance",
+  "config.portable_tunes.input_disc_damage_chance": "Input Disc Damage Chance",
+  "config.portable_tunes.min_mixtape_length": "Minimum Mixtape Length",
+  "config.portable_tunes.max_mixtape_length": "Maximum Mixtape Length"
 }
