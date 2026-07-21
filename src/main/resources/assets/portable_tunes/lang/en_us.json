@@ -6,6 +6,7 @@
 
   "item.portable_tunes.cassette": "Cassette",
   "item.portable_tunes.cassette.blank": "Blank Cassette",
+  "item.portable_tunes.cassette_player": "Cassette Player",
   "item.portable_tunes.cassette.named_mixtape": "%s Mixtape",
   "item.portable_tunes.cassette.empty": "Use a Tape Deck to record up to %s songs onto this cassette.",
   "item.portable_tunes.cassette.mixtape_by": "By %s",
@@ -41,5 +42,7 @@
   "config.portable_tunes.input_disc_interruption_damage_chance": "Input Disc Interruption Damage Chance",
   "config.portable_tunes.min_mixtape_length": "Minimum Mixtape Length",
   "config.portable_tunes.max_mixtape_length": "Maximum Mixtape Length",
-  "config.portable_tunes.show_song_change_notification": "Show Song Change Notification"
+  "config.portable_tunes.show_song_change_notification": "Show Song Change Notification",
+  "container.portable_tunes.cassette_player": "CassettePlayer",
+  "toast.portable_tunes.now_playing": "Now playing"
 }

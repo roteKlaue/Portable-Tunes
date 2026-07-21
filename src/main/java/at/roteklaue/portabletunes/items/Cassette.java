@@ -24,10 +24,7 @@ public class Cassette extends Item {
     }
 
     private static CassetteContents getContents(ItemStack stack) {
-        return stack.getOrDefault(
-                PortableDataComponents.CASSETTE_CONTENTS.get(),
-                CassetteContents.EMPTY
-        );
+        return stack.getOrDefault(PortableDataComponents.CASSETTE_CONTENTS.get(), CassetteContents.EMPTY);
     }
 
     public static boolean isEmpty(ItemStack stack) {
@@ -39,17 +36,8 @@ public class Cassette extends Item {
         return getContents(stack).songs();
     }
 
-    public static boolean addSong(
-            ItemStack stack,
-            ResourceKey<JukeboxSong> song
-    ) {
-        return addSong(
-                stack,
-                new JukeboxPlayable(
-                        new EitherHolder<>(song),
-                        true
-                )
-        );
+    public static boolean addSong(ItemStack stack, ResourceKey<JukeboxSong> song) {
+        return addSong(stack, new JukeboxPlayable(new EitherHolder<>(song), true));
     }
 
     public static boolean addSong(
@@ -60,29 +48,19 @@ public class Cassette extends Item {
 
         if (contents.isFull()) return false;
         CassetteContents updatedContents = contents.add(song.withTooltip(true));
-        stack.set(
-                PortableDataComponents.CASSETTE_CONTENTS.get(),
-                updatedContents
-        );
+        stack.set(PortableDataComponents.CASSETTE_CONTENTS.get(), updatedContents);
 
         stack.remove(PortableDataComponents.MIXTAPE_DATA.get());
         return true;
     }
 
-    public static boolean removeSong(
-            @Nonnull ItemStack stack,
-            int index
-    ) {
+    public static boolean removeSong(@Nonnull ItemStack stack, int index) {
         CassetteContents contents = getContents(stack);
         if (index < 0 || index >= contents.size()) return false;
 
         CassetteContents updatedContents = contents.remove(index);
 
-        stack.set(
-                PortableDataComponents.CASSETTE_CONTENTS.get(),
-                updatedContents
-        );
-
+        stack.set(PortableDataComponents.CASSETTE_CONTENTS.get(), updatedContents);
         stack.remove(PortableDataComponents.MIXTAPE_DATA.get());
         return true;
     }
@@ -113,10 +91,7 @@ public class Cassette extends Item {
         mixtapeData = worldData.getMixtape(songKeys);
         if (mixtapeData == null) return false;
 
-        stack.set(
-                PortableDataComponents.MIXTAPE_DATA.get(),
-                mixtapeData
-        );
+        stack.set(PortableDataComponents.MIXTAPE_DATA.get(), mixtapeData);
 
         return true;
     }
@@ -171,10 +146,7 @@ public class Cassette extends Item {
         var currentData = stack.get(PortableDataComponents.MIXTAPE_DATA.get());
 
         if (mixtapeData.equals(currentData)) return;
-        stack.set(
-                PortableDataComponents.MIXTAPE_DATA.get(),
-                mixtapeData
-        );
+        stack.set(PortableDataComponents.MIXTAPE_DATA.get(), mixtapeData);
     }
 
     @Nonnull

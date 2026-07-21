@@ -28,15 +28,16 @@ public class TapeDeckBlockEntity
     public static final int OUTPUT_DISC_SLOT = 1;
     public static final int CASSETTE_SLOT = 2;
     public static final int INVENTORY_SIZE = 3;
+    public static final int MAX_PROGRESS = 100;
     private static final String INVENTORY_TAG = "TapeDeckInventory";
 
-    private static final int MAX_PROGRESS = 100;
     private double progress;
     private boolean processing;
     private static Double PROGRESS_PER_TICK = null;
     private static Double INPUT_DAMAGE_CHANCE = null;
     private static Double OUTPUT_DAMAGE_CHANCE = null;
     private static Double CASSETTE_DAMAGE_CHANCE = null;
+    private static Double INTERRUPTION_DAMAGE_CHANCE = null;
 
     private final ItemStackHandler inventory = new ItemStackHandler(INVENTORY_SIZE) {
         @Override
@@ -47,12 +48,7 @@ public class TapeDeckBlockEntity
             if (level == null || level.isClientSide()) return;
 
             BlockState state = getBlockState();
-            level.sendBlockUpdated(
-                    worldPosition,
-                    state,
-                    state,
-                    Block.UPDATE_CLIENTS
-            );
+            level.sendBlockUpdated(worldPosition, state, state, Block.UPDATE_CLIENTS);
         }
 
         @Override
@@ -79,6 +75,21 @@ public class TapeDeckBlockEntity
         private boolean canPlaceInInputSlot(ItemStack stack) {
             return stack.has(DataComponents.JUKEBOX_PLAYABLE);
         }
+
+        @Override
+        @Nonnull
+        public ItemStack extractItem(int slot, int amount, boolean simulate) {
+            ItemStack extracted = super.extractItem(slot, amount, simulate);
+
+            if (simulate) return extracted;
+            if (extracted.isEmpty()) return extracted;
+            if (slot != INPUT_DISC_SLOT) return extracted;
+            if (!processing || level == null) return extracted;
+            if (level.getRandom().nextDouble() >= INTERRUPTION_DAMAGE_CHANCE) return extracted;
+
+            stopProcessing();
+            return new ItemStack(PortableItems.BROKEN_DISC.get());
+        }
     };
 
     public TapeDeckBlockEntity(BlockPos blockPos, BlockState blockState) {
@@ -95,14 +106,10 @@ public class TapeDeckBlockEntity
         if (INPUT_DAMAGE_CHANCE == null) INPUT_DAMAGE_CHANCE = Config.INPUT_DISC_DAMAGE_CHANCE.get();
         if (OUTPUT_DAMAGE_CHANCE == null) OUTPUT_DAMAGE_CHANCE = Config.OUTPUT_DISC_DAMAGE_CHANCE.get();
         if (CASSETTE_DAMAGE_CHANCE == null) CASSETTE_DAMAGE_CHANCE = Config.OUTPUT_CASSETTE_DAMAGE_CHANCE.get();
+        if (INTERRUPTION_DAMAGE_CHANCE == null) INTERRUPTION_DAMAGE_CHANCE = Config.INPUT_DISC_INTERRUPTION_DAMAGE_CHANCE.get();
     }
 
-    public static void tick(
-            Level level,
-            BlockPos blockPos,
-            BlockState blockState,
-            TapeDeckBlockEntity blockEntity
-    ) {
+    public static void tick(Level level, BlockPos blockPos, BlockState blockState, TapeDeckBlockEntity blockEntity) {
         if (level.isClientSide()) return;
         blockEntity.serverTick();
     }
@@ -111,15 +118,40 @@ public class TapeDeckBlockEntity
         return processing;
     }
 
+    public double getProgress() {
+        return progress;
+    }
+
+    public void startProcessing() {
+        if (processing) return;
+        if (inventory.getStackInSlot(INPUT_DISC_SLOT).isEmpty()) return;
+        if (inventory.getStackInSlot(OUTPUT_DISC_SLOT).isEmpty()
+            && inventory.getStackInSlot(CASSETTE_SLOT).isEmpty()) return;
+        processing = true;
+        setChanged();
+    }
+
+    private void stopProcessing() {
+        processing = false;
+        progress = 0;
+        setChanged();
+    }
+
     private void serverTick() {
         if (!processing || level == null) return;
-
-        progress += PROGRESS_PER_TICK;
-        if (progress < MAX_PROGRESS) return;
 
         ItemStack inputDiscStack = inventory.getStackInSlot(INPUT_DISC_SLOT);
         ItemStack outputDiscStack = inventory.getStackInSlot(OUTPUT_DISC_SLOT);
         ItemStack cassetteStack = inventory.getStackInSlot(CASSETTE_SLOT);
+
+        if ((cassetteStack.isEmpty() && outputDiscStack.isEmpty())
+            || inputDiscStack.isEmpty()) {
+            stopProcessing();
+            return;
+        }
+
+        progress += PROGRESS_PER_TICK;
+        if (progress < MAX_PROGRESS) return;
 
         if (!inputDiscStack.isEmpty() && !outputDiscStack.isEmpty()) {
             inventory.setStackInSlot(OUTPUT_DISC_SLOT, inputDiscStack.copyWithCount(1));
@@ -137,9 +169,7 @@ public class TapeDeckBlockEntity
         damageSlot(OUTPUT_DISC_SLOT, OUTPUT_DAMAGE_CHANCE, PortableItems.BROKEN_DISC.get());
         damageSlot(CASSETTE_SLOT, CASSETTE_DAMAGE_CHANCE, PortableItems.BROKEN_CASSETTE.get());
 
-        processing = false;
-        progress = 0;
-        setChanged();
+        stopProcessing();
     }
 
     private void damageSlot(int slot, double damageChance, Item brokenItem) {
@@ -162,43 +192,30 @@ public class TapeDeckBlockEntity
     }
 
     public void dropContents() {
-        if (level == null || level.isClientSide()) {
-            return;
+        if (level == null || level.isClientSide()) return;
+
+        var inputDiscStack = inventory.getStackInSlot(INPUT_DISC_SLOT);
+        if (!inputDiscStack.isEmpty()) {
+            if (processing && level.getRandom().nextDouble() < INTERRUPTION_DAMAGE_CHANCE)
+                inputDiscStack = new ItemStack(PortableItems.BROKEN_DISC.get());
+
+            Containers.dropItemStack(level, worldPosition.getX(), worldPosition.getY(), worldPosition.getZ(), inputDiscStack);
         }
 
-        for (int slot = 0; slot < inventory.getSlots(); slot++) {
-            ItemStack stack = inventory.extractItem(
-                    slot,
-                    inventory.getSlotLimit(slot),
-                    false
-            );
+        for (int slot = 1; slot < inventory.getSlots(); slot++) {
+            ItemStack stack = inventory.extractItem(slot, inventory.getSlotLimit(slot), false);
 
-            if (stack.isEmpty()) {
-                continue;
-            }
-
-            Containers.dropItemStack(
-                    level,
-                    worldPosition.getX(),
-                    worldPosition.getY(),
-                    worldPosition.getZ(),
-                    stack
-            );
+            if (stack.isEmpty()) continue;
+            Containers.dropItemStack(level, worldPosition.getX(), worldPosition.getY(), worldPosition.getZ(), stack);
         }
     }
 
     @Override
-    protected void loadAdditional(
-            @Nonnull CompoundTag tag,
-            @Nonnull HolderLookup.Provider registries
-    ) {
+    protected void loadAdditional(@Nonnull CompoundTag tag, @Nonnull HolderLookup.Provider registries) {
         super.loadAdditional(tag, registries);
 
         if (tag.contains(INVENTORY_TAG)) {
-            inventory.deserializeNBT(
-                    registries,
-                    tag.getCompound(INVENTORY_TAG)
-            );
+            inventory.deserializeNBT(registries, tag.getCompound(INVENTORY_TAG));
         }
 
         progress = tag.getDouble("Progress");

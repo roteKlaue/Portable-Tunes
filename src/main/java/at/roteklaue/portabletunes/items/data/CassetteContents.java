@@ -32,15 +32,11 @@ public record CassetteContents(List<JukeboxPlayable> songs) {
         songs = List.copyOf(songs);
 
         if (songs.size() > TECHNICAL_MAX_SONGS) {
-            throw new IllegalArgumentException(
-                    "A cassette cannot contain more than " + TECHNICAL_MAX_SONGS + " songs"
-            );
+            throw new IllegalArgumentException("A cassette cannot contain more than " + TECHNICAL_MAX_SONGS + " songs");
         }
     }
 
-    private static DataResult<List<JukeboxPlayable>> validateSongs(
-            List<JukeboxPlayable> songs
-    ) {
+    private static DataResult<List<JukeboxPlayable>> validateSongs(List<JukeboxPlayable> songs) {
         if (songs.size() <= Math.min(TECHNICAL_MAX_SONGS, Config.getMaximumMixtapeLength())) {
             return DataResult.success(songs);
         }
@@ -63,9 +59,7 @@ public record CassetteContents(List<JukeboxPlayable> songs) {
     }
 
     public CassetteContents add(JukeboxPlayable song) {
-        if (isFull()) {
-            return this;
-        }
+        if (isFull()) return this;
 
         List<JukeboxPlayable> updatedSongs = new ArrayList<>(songs);
         updatedSongs.add(song);
@@ -74,9 +68,7 @@ public record CassetteContents(List<JukeboxPlayable> songs) {
     }
 
     public CassetteContents remove(int index) {
-        if (index < 0 || index >= songs.size()) {
-            return this;
-        }
+        if (index < 0 || index >= songs.size()) return this;
 
         List<JukeboxPlayable> updatedSongs = new ArrayList<>(songs);
         updatedSongs.remove(index);
@@ -85,10 +77,7 @@ public record CassetteContents(List<JukeboxPlayable> songs) {
     }
 
     public JukeboxPlayable get(int index) {
-        if (index < 0 || index >= songs.size()) {
-            return null;
-        }
-
+        if (index < 0 || index >= songs.size()) return null;
         return songs.get(index);
     }
 }

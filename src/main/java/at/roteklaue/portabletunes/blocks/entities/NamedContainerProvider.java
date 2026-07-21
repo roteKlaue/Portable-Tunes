@@ -53,10 +53,7 @@ public abstract class NamedContainerProvider<T extends NamedContainerProvider<T>
     }
 
     @Override
-    protected void loadAdditional(
-            @Nonnull CompoundTag tag,
-            @Nonnull HolderLookup.Provider registries
-    ) {
+    protected void loadAdditional(@Nonnull CompoundTag tag, @Nonnull HolderLookup.Provider registries) {
         super.loadAdditional(tag, registries);
 
         if (!tag.contains("CustomName", Tag.TAG_STRING)) {
@@ -71,10 +68,7 @@ public abstract class NamedContainerProvider<T extends NamedContainerProvider<T>
     }
 
     @Override
-    protected void saveAdditional(
-            @Nonnull CompoundTag tag,
-            @Nonnull HolderLookup.Provider registries
-    ) {
+    protected void saveAdditional(@Nonnull CompoundTag tag, @Nonnull HolderLookup.Provider registries) {
         super.saveAdditional(tag, registries);
 
         if (!hasCustomName()) return;
@@ -107,23 +101,16 @@ public abstract class NamedContainerProvider<T extends NamedContainerProvider<T>
 
     @Nullable
     @Override
-    public AbstractContainerMenu createMenu(
-            int containerId,
-            @Nonnull Inventory playerInventory,
-            @Nonnull Player player
-    ) {
-        if (!blockEntityClass.isInstance(this)) {
-            return null;
-        }
+    public AbstractContainerMenu createMenu(int containerId,
+                                            @Nonnull Inventory playerInventory,
+                                            @Nonnull Player player) {
+        if (!blockEntityClass.isInstance(this)) return null;
 
-        var returnVal = containerFactory.create(
+        return containerFactory.create(
                 containerId,
                 playerInventory,
                 blockEntityClass.cast(this)
         );
-
-        PortableTunes.LOGGER.info(returnVal.toString());
-        return returnVal;
     }
 
     @FunctionalInterface

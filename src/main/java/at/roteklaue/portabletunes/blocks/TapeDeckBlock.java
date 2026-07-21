@@ -6,7 +6,6 @@ import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -16,7 +15,6 @@ import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
-import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
@@ -41,15 +39,13 @@ public class TapeDeckBlock extends BaseEntityBlock implements EntityBlock {
     private TapeDeckBlock(Properties properties) {
         super(properties);
 
-        registerDefaultState(
-                stateDefinition.any()
+        registerDefaultState(stateDefinition.any()
                         .setValue(FACING, Direction.NORTH)
-                        .setValue(PART, TapeDeckPart.LEFT)
-        );
+                        .setValue(PART, TapeDeckPart.LEFT));
     }
 
     public TapeDeckBlock() {
-        super(Properties.of()
+        this(Properties.of()
                 .ignitedByLava()
                 .mapColor(MapColor.WOOD)
                 .strength(2.0F, 3.0F)
@@ -59,9 +55,7 @@ public class TapeDeckBlock extends BaseEntityBlock implements EntityBlock {
 
     @Nullable
     @Override
-    public BlockState getStateForPlacement(
-            @Nonnull BlockPlaceContext context
-    ) {
+    public BlockState getStateForPlacement(@Nonnull BlockPlaceContext context) {
         Direction facing = context.getHorizontalDirection();
 
         BlockPos leftPos = context.getClickedPos();
@@ -92,23 +86,13 @@ public class TapeDeckBlock extends BaseEntityBlock implements EntityBlock {
     ) {
         super.setPlacedBy(level, blockPos, state, placer, stack);
 
-        if (level.isClientSide()) {
-            return;
-        }
+        if (level.isClientSide()) return;
 
         Direction facing = state.getValue(FACING);
         BlockPos rightPos = blockPos.relative(getRightDirection(facing));
 
-        BlockState rightState = state.setValue(
-                PART,
-                TapeDeckPart.RIGHT
-        );
-
-        level.setBlock(
-                rightPos,
-                rightState,
-                Block.UPDATE_ALL
-        );
+        BlockState rightState = state.setValue(PART, TapeDeckPart.RIGHT);
+        level.setBlock(rightPos, rightState, Block.UPDATE_ALL);
     }
 
 
@@ -121,13 +105,7 @@ public class TapeDeckBlock extends BaseEntityBlock implements EntityBlock {
             boolean movedByPiston
     ) {
         if (oldState.is(newState.getBlock())) {
-            super.onRemove(
-                    oldState,
-                    level,
-                    blockPos,
-                    newState,
-                    movedByPiston
-            );
+            super.onRemove(oldState, level, blockPos, newState, movedByPiston);
             return;
         }
 
@@ -147,21 +125,12 @@ public class TapeDeckBlock extends BaseEntityBlock implements EntityBlock {
             level.removeBlock(otherPos, false);
         }
 
-        super.onRemove(
-                oldState,
-                level,
-                blockPos,
-                newState,
-                movedByPiston
-        );
+        super.onRemove(oldState, level, blockPos, newState, movedByPiston);
     }
 
     @Nullable
     @Override
-    public BlockEntity newBlockEntity(
-            @Nonnull BlockPos blockPos,
-            @Nonnull BlockState blockState
-    ) {
+    public BlockEntity newBlockEntity(@Nonnull BlockPos blockPos, @Nonnull BlockState blockState) {
         if (blockState.getValue(PART) != TapeDeckPart.LEFT) return null;
         return new TapeDeckBlockEntity(blockPos, blockState);
     }
@@ -176,11 +145,7 @@ public class TapeDeckBlock extends BaseEntityBlock implements EntityBlock {
         if (level.isClientSide()) return null;
         if (blockState.getValue(PART) != TapeDeckPart.LEFT) return null;
 
-        return createTickerHelper(
-                blockEntityType,
-                PortableBlockEntities.TAPE_DECK.get(),
-                TapeDeckBlockEntity::tick
-        );
+        return createTickerHelper(blockEntityType, PortableBlockEntities.TAPE_DECK.get(), TapeDeckBlockEntity::tick);
     }
 
     @Override
@@ -193,6 +158,13 @@ public class TapeDeckBlock extends BaseEntityBlock implements EntityBlock {
     @Nonnull
     protected RenderShape getRenderShape(@Nonnull BlockState blockState) {
         return RenderShape.MODEL;
+    }
+
+    private int getSidedSlot(TapeDeckPart half) {
+        return switch (half) {
+            case LEFT -> 0;
+            case RIGHT -> 1;
+        };
     }
 
     @Override
@@ -214,21 +186,13 @@ public class TapeDeckBlock extends BaseEntityBlock implements EntityBlock {
         ItemStack heldStack = player.getMainHandItem();
         if (heldStack.isEmpty()) heldStack = player.getOffhandItem();
 
-        int slotToCheck = switch (state.getValue(PART)) {
-            case LEFT -> 0;
-            case RIGHT -> 1;
-        };
-
+        int slotToCheck = getSidedSlot(state.getValue(PART));
         IItemHandler handler = tapeDeck.getInventory();
         if (!heldStack.isEmpty()
                 && handler.getStackInSlot(slotToCheck).isEmpty()
                 && handler.isItemValid(slotToCheck, heldStack)) {
             ItemStack stackToInsert = heldStack.copyWithCount(1);
-            ItemStack remainder = handler.insertItem(
-                    slotToCheck,
-                    stackToInsert,
-                    false
-            );
+            ItemStack remainder = handler.insertItem(slotToCheck, stackToInsert, false);
 
             if (remainder.isEmpty()) {
                 if (!player.getAbilities().instabuild) {
@@ -240,15 +204,23 @@ public class TapeDeckBlock extends BaseEntityBlock implements EntityBlock {
             }
         }
 
+        if (heldStack.isEmpty() && player.isCrouching()) {
+            int slot = getSidedSlot(state.getValue(PART));
+            ItemStack extractedStack = handler.extractItem(slot, 1, false);
+
+            if (!extractedStack.isEmpty()) {
+                player.getInventory().placeItemBackInInventory(extractedStack);
+                tapeDeck.setChanged();
+                return InteractionResult.CONSUME;
+            }
+        }
+
         player.openMenu(tapeDeck);
         return InteractionResult.CONSUME;
     }
 
     @Nonnull
-    public static BlockPos getMainPos(
-            @Nonnull BlockState state,
-            @Nonnull BlockPos blockPos
-    ) {
+    public static BlockPos getMainPos(@Nonnull BlockState state, @Nonnull BlockPos blockPos) {
         if (state.getValue(PART) == TapeDeckPart.LEFT) return blockPos;
 
         Direction facing = state.getValue(FACING);
@@ -256,17 +228,12 @@ public class TapeDeckBlock extends BaseEntityBlock implements EntityBlock {
     }
 
     @Nonnull
-    private static BlockPos getOtherPos(
-            @Nonnull BlockState state,
-            @Nonnull BlockPos blockPos
-    ) {
+    private static BlockPos getOtherPos(@Nonnull BlockState state, @Nonnull BlockPos blockPos) {
         return blockPos.relative(getOtherDirection(state));
     }
 
     @Nonnull
-    private static Direction getOtherDirection(
-            @Nonnull BlockState state
-    ) {
+    private static Direction getOtherDirection(@Nonnull BlockState state) {
         Direction facing = state.getValue(FACING);
         TapeDeckPart part = state.getValue(PART);
 
@@ -275,23 +242,16 @@ public class TapeDeckBlock extends BaseEntityBlock implements EntityBlock {
     }
 
     @Nonnull
-    private static Direction getRightDirection(
-            @Nonnull Direction facing
-    ) {
+    private static Direction getRightDirection(@Nonnull Direction facing) {
         return facing.getClockWise();
     }
 
     @Nonnull
-    private static Direction getLeftDirection(
-            @Nonnull Direction facing
-    ) {
+    private static Direction getLeftDirection(@Nonnull Direction facing) {
         return facing.getCounterClockWise();
     }
 
-    private static boolean isMatchingOtherHalf(
-            @Nonnull BlockState state,
-            @Nonnull BlockState otherState
-    ) {
+    private static boolean isMatchingOtherHalf(@Nonnull BlockState state, @Nonnull BlockState otherState) {
         if (!otherState.is(state.getBlock())) return false;
 
         if (state.getValue(FACING) != otherState.getValue(FACING)) return false;
@@ -299,9 +259,7 @@ public class TapeDeckBlock extends BaseEntityBlock implements EntityBlock {
     }
 
     @Override
-    protected void createBlockStateDefinition(
-            @Nonnull StateDefinition.Builder<Block, BlockState> builder
-    ) {
+    protected void createBlockStateDefinition(@Nonnull StateDefinition.Builder<Block, BlockState> builder) {
         builder.add(FACING, PART);
     }
 }

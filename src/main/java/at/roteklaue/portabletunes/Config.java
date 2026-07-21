@@ -1,7 +1,15 @@
 package at.roteklaue.portabletunes;
 
+import at.roteklaue.portabletunes.client.event.ClientConfigChangedEvent;
 import at.roteklaue.portabletunes.items.data.CassetteContents;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.event.config.ModConfigEvent;
 import net.neoforged.neoforge.common.ModConfigSpec;
+import net.neoforged.neoforge.common.NeoForge;
+
+import java.util.Objects;
 
 public final class Config {
     private static final ModConfigSpec.Builder SERVER_CONFIG_BUILDER =
@@ -82,6 +90,7 @@ public final class Config {
         return Math.max(MIN_MIXTAPE_LENGTH.get(), MAX_MIXTAPE_LENGTH.get());
     }
 
+    @EventBusSubscriber(modid = PortableTunes.MODID, value = Dist.CLIENT)
     public static class ClientConfig {
         private static final ModConfigSpec.Builder CLIENT_CONFIG_BUILDER =
                 new ModConfigSpec.Builder();
@@ -97,6 +106,22 @@ public final class Config {
                     .define("showSongChangeNotification", true);
 
             CLIENT_CONFIG_BUILDER.pop();
+        }
+
+        @SubscribeEvent
+        public static void onConfigReloading(ModConfigEvent.Reloading event) {
+            if (!Objects.equals(event.getConfig().getSpec(), CLIENT_CONFIG_BUILDER)) return;
+            applyClientConfig();
+        }
+
+        private static void applyClientConfig() {
+            NeoForge.EVENT_BUS.post(new ClientConfigChangedEvent());
+        }
+
+        @SubscribeEvent
+        public static void onConfigLoading(ModConfigEvent.Loading event) {
+            if (!Objects.equals(event.getConfig().getSpec(), CLIENT_CONFIG_BUILDER)) return;
+            applyClientConfig();
         }
 
         public static final ModConfigSpec CLIENT_SPEC = CLIENT_CONFIG_BUILDER.build();
